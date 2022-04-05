@@ -1,0 +1,21 @@
+"Records": [
+	{
+	"EventSource": "aws:sns",
+	"EventVersion": "1.0",
+	"EventSubscriptionArn": "arn:aws:sns:ap-northeast-2:482185933710:KG-WEB-CREATE:19c8a920-6189-4f5a-add3-6e746aa33c17",
+	"Sns": {
+	"Type": "Notification",
+	"MessageId": "284cd3c6-1e8d-500f-9ab1-89029980d3e2",
+	"TopicArn": "arn:aws:sns:ap-northeast-2:482185933710:KG-WEB-CREATE",
+	"Subject": "Auto Scaling: launch for group \"asd\"",
+	"Message": "{\"Origin\":\"EC2\",\"Destination\":\"AutoScalingGroup\",\"Progress\":50,\"AccountId\":\"482185933710\",\"Description\":\"Launching a new EC2 instance: i-062041d426ac05008\",\"RequestId\":\"2ab5ffcc-5922-a132-94f7-57ca7e74651e\",\"EndTime\":\"2022-04-04T05:40:29.720Z\",\"AutoScalingGroupARN\":\"arn:aws:autoscaling:ap-northeast-2:482185933710:autoScalingGroup:c4790134-0de4-47e9-acd7-5aac78915534:autoScalingGroupName/asd\",\"ActivityId\":\"2ab5ffcc-5922-a132-94f7-57ca7e74651e\",\"StartTime\":\"2022-04-04T05:39:58.248Z\",\"Service\":\"AWS Auto Scaling\",\"Time\":\"2022-04-04T05:40:29.720Z\",\"EC2InstanceId\":\"i-062041d426ac05008\",\"StatusCode\":\"InProgress\",\"StatusMessage\":\"\",\"Details\":{\"Subnet ID\":\"subnet-9a9808f1\",\"Availability Zone\":\"ap-northeast-2a\"},\"AutoScalingGroupName\":\"asd\",\"Cause\":\"At 2022-04-04T05:39:56Z an instance was started in response to a difference between desired and actual capacity, increasing the capacity from 1 to 2.\",\"Event\":\"autoscaling:EC2_INSTANCE_LAUNCH\"}",
+	"Timestamp": "2022-04-04T05:40:29.755Z",
+	"SignatureVersion": "1",
+	"Signature": "QW/adSwB0HdJgad+YwZQbNm3Co9+sqZGCRa4/YiEC9s2/8eK0OhITRNv5vTliRkXzi6cViFOz05ixfn+KzIZ1WMa4/Xityws0Vvy2NUnaLWSDiuMGLkTIjyrUYZ8aRUjjgtBesjtBqmkMc++smPUG1A4jw9hse+4Yn4NSKgHggGPUmuCWr2DfZPGxqdqc+46ZN/YWeTaXPYfYND/lQDfOQ2pYz8lq8Orxs3cnc4PEuYENn15oHB906Holj8W5fbwgj1c4w2DjORwtiowgAoznXUH2813RhTDVC99HFx898oExTXrJRFpzZwQd6L+cHTZWbYVym9TPxmAaiRS2UVung==",
+	"SigningCertUrl": "https://sns.ap-northeast-2.amazonaws.com/SimpleNotificationService-7ff5318490ec183fbaddaa2a969abfda.pem",
+	"UnsubscribeUrl": "https://sns.ap-northeast-2.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:ap-northeast-2:482185933710:KG-WEB-CREATE:19c8a920-6189-4f5a-add3-6e746aa33c17",
+	"MessageAttributes": {}
+}
+}
+]
+}

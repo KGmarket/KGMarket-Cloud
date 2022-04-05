@@ -1,0 +1,373 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: KG Market Network Template 
+
+
+Parameters:
+######################
+# Parameters section
+######################
+
+
+  KeyName:
+    Description: Name of an existing EC2 KeyPair to enable SSH access to the instances. Linked to AWS Parameter
+    Type: AWS::EC2::KeyPair::KeyName
+    ConstraintDescription: must be the name of an existing EC2 KeyPair.
+
+Mappings:
+######################
+# Mappings section
+######################
+  RegionMap:
+    ap-northeast-2:
+      NAT: "ami-00550ccc38e992b78"
+    us-east-1:
+      NAT: "ami-00a36856283d67c39"
+    us-west-2:
+      NAT: "ami-0032ea5ae08aa27a2"
+
+Resources:
+####################################
+# VPC ,IGW, Subnet, Routing Table 생성 #
+###################################
+
+  ## VPC
+  kgVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      CidrBlock: 10.0.0.0/16
+      Tags:
+       - Key: Name
+         Value: kgVPC
+
+      
+  ## Internet Gateway
+  kgIGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+       - Key: Name
+         Value: kg Internet Gateway
+  
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref kgVPC
+      InternetGatewayId: !Ref kgIGW
+
+  
+  ## Public Route Table
+  kgPublicRT:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref kgVPC
+      Tags:
+       - Key: Name
+         Value: kg Public Route Table
+  
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      RouteTableId: !Ref kgPublicRT
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref kgIGW
+
+
+###########################################
+# Public Subnet 생성 및 Route Table 연결 #
+##########################################
+
+  ## Public Subnet1
+  PublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref kgVPC
+      CidrBlock: 10.0.0.0/24
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: !Select 
+        - 0
+        - !GetAZs 
+          Ref: AWS::Region
+      Tags:
+       - Key: Name
+         Value: PublicSubnet1
+
+  PublicSubnetRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      RouteTableId: !Ref kgPublicRT
+  
+  PublicSubnetNetworkAclAssociation1:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      NetworkAclId: !GetAtt 
+        - kgVPC
+        - DefaultNetworkAcl
+
+
+  ## Public Subnet2
+  PublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref kgVPC
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      AvailabilityZone: !Select 
+        - 2
+        - !GetAZs 
+          Ref: AWS::Region
+      Tags:
+       - Key: Name
+         Value: PublicSubnet2
+
+  
+  PublicSubnetRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref kgPublicRT
+  
+  PublicSubnetNetworkAclAssociation2:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      NetworkAclId: !GetAtt 
+        - kgVPC
+        - DefaultNetworkAcl
+
+
+######################
+# Security Group section
+######################
+
+  ##NAT Seucurity Group
+  NATSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+        GroupDescription: Allow All Traffics to Internet
+        VpcId: !Ref kgVPC
+        SecurityGroupIngress:
+        - IpProtocol: All
+          CidrIp: 0.0.0.0/0
+        Tags:
+        - Key: Name
+          Value: KG-NAT-SG
+
+  ## Load Balancer Security Group
+  ALBSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP ingress
+      VpcId: !Ref kgVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: ALBSG
+
+
+  ## BASTION Security Group
+  BastionSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP ingress
+      VpcId: !Ref kgVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: BastionSG
+
+
+  ## Web Server Security Group
+  WebSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable HTTP ingress
+      VpcId: !Ref kgVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          SourceSecurityGroupId: !Ref BastionSG
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          SourceSecurityGroupId: !Ref ALBSG
+      Tags:
+        - Key: Name
+          Value: WebSG
+
+
+  ## DB Server Security Group
+  DBSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable MYSQL/Aurora ingress
+      VpcId: !Ref kgVPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          SourceSecurityGroupId: !Ref BastionSG
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref BastionSG
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          SourceSecurityGroupId: !Ref WebSG
+      Tags:
+        - Key: Name
+          Value: DBSG
+
+
+
+############################################
+# NAT Instance 및 Private Route Table 생성 #
+###########################################
+  NATInstance1:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap
+        - RegionMap
+        - !Ref 'AWS::Region'
+        - NAT
+      KeyName: !Ref KeyName
+      InstanceType: t2.micro
+      SecurityGroupIds:
+        - !Ref NATSG
+      SourceDestCheck: false
+      SubnetId: !Ref PublicSubnet1
+      Tags:
+      - Key: Name
+        Value: KG-NAT-Instance1
+
+  ## Private Route Table
+  kgPrivateRT1:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref kgVPC
+      Tags:
+       - Key: Name
+         Value: kg Private Route Table1
+
+  NatRoute1:
+    Type: AWS::EC2::Route
+    Properties:
+       RouteTableId: !Ref kgPrivateRT1
+       DestinationCidrBlock: 0.0.0.0/0
+       InstanceId: !Ref NATInstance1
+
+
+  NATInstance2:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !FindInMap
+        - RegionMap
+        - !Ref 'AWS::Region'
+        - NAT
+      KeyName: !Ref KeyName
+      InstanceType: t2.micro
+      SecurityGroupIds:
+        - !Ref NATSG
+      SourceDestCheck: false
+      SubnetId: !Ref PublicSubnet2
+      Tags:
+      - Key: Name
+        Value: KG-NAT-Instance2
+
+  kgPrivateRT2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref kgVPC
+      Tags:
+      - Key: Name
+        Value: kg Private Route Table2
+
+  NatRoute2:
+    Type: AWS::EC2::Route
+    Properties:
+       RouteTableId: !Ref kgPrivateRT2
+       DestinationCidrBlock: 0.0.0.0/0
+       InstanceId: !Ref NATInstance2
+
+
+
+
+#######################
+# Private Subnet 생성 #
+######################
+  ## Private Subnet1
+  PrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref kgVPC
+      CidrBlock: 10.0.2.0/23
+      AvailabilityZone: !Select 
+        - 0
+        - !GetAZs 
+          Ref: AWS::Region
+      Tags:
+       - Key: Name
+         Value: PrivateSubnet1
+
+  
+  PrivateSubnetRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      RouteTableId: !Ref kgPrivateRT1
+  
+  PrivateSubnetNetworkAclAssociation1:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      NetworkAclId: !GetAtt 
+        - kgVPC
+        - DefaultNetworkAcl
+
+
+
+  ## Private Subnet2
+  PrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref kgVPC
+      CidrBlock: 10.0.4.0/23
+      AvailabilityZone: !Select 
+        - 2
+        - !GetAZs 
+          Ref: AWS::Region
+      Tags:
+       - Key: Name
+         Value: PrivateSubnet2
+
+  
+  PrivateSubnetRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
+      RouteTableId: !Ref kgPrivateRT2
+  
+  PrivateSubnetNetworkAclAssociation2:
+    Type: AWS::EC2::SubnetNetworkAclAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnet2
+      NetworkAclId: !GetAtt 
+        - kgVPC
+        - DefaultNetworkAcl
+
+
+

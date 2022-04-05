@@ -1,0 +1,22 @@
+Event received by Lambda function: {
+	"Records": [
+	{
+	"EventSource": "aws:sns",
+	"EventVersion": "1.0",
+	"EventSubscriptionArn": "arn:aws:sns:ap-northeast-2:482185933710:KG-WEB-DELETE:a5b12246-4757-4311-89b4-02f2ff43621a",
+	"Sns": {
+	"Type": "Notification",
+	"MessageId": "c576a3cc-8e64-563e-9990-f9083571f358",
+	"TopicArn": "arn:aws:sns:ap-northeast-2:482185933710:KG-WEB-DELETE",
+	"Subject": "Auto Scaling: termination for group \"asd\"",
+	"Message": "{\"Origin\":\"AutoScalingGroup\",\"Destination\":\"EC2\",\"Progress\":50,\"AccountId\":\"482185933710\",\"Description\":\"Terminating EC2 instance: i-02a6801d2cca72ad9\",\"RequestId\":\"c16bf3f3-cacf-43c1-850d-64a26f027949\",\"EndTime\":\"2022-04-04T09:22:29.668Z\",\"AutoScalingGroupARN\":\"arn:aws:autoscaling:ap-northeast-2:482185933710:autoScalingGroup:6df200fc-59fb-4680-b0c6-2538027adaed:autoScalingGroupName/asd\",\"ActivityId\":\"c16bf3f3-cacf-43c1-850d-64a26f027949\",\"StartTime\":\"2022-04-04T09:17:11.492Z\",\"Service\":\"AWS Auto Scaling\",\"Time\":\"2022-04-04T09:22:29.668Z\",\"EC2InstanceId\":\"i-02a6801d2cca72ad9\",\"StatusCode\":\"InProgress\",\"StatusMessage\":\"\",\"Details\":{\"Subnet ID\":\"subnet-9a9808f1\",\"Availability Zone\":\"ap-northeast-2a\"},\"AutoScalingGroupName\":\"asd\",\"Cause\":\"At 2022-04-04T09:16:58Z a user request force deleted AutoScaling group changing the desired capacity from 2 to 0. At 2022-04-04T09:17:11Z an instance was taken out of service in response to a difference between desired and actual capacity, shrinking the capacity from 2 to 0. At 2022-04-04T09:17:11Z instance i-02a6801d2cca72ad9 was selected for termination. At 2022-04-04T09:17:11Z instance i-0812f572644223afb was selected for termination.\",\"Event\":\"autoscaling:EC2_INSTANCE_TERMINATE\"}",
+	"Timestamp": "2022-04-04T09:22:29.712Z",
+	"SignatureVersion": "1",
+	"Signature": "FFMAx5Qo3diom9mRA7dr6+wDmzgQEcOFxEUjrwskAsDD7mGacmXdYgHvEks0maOIxa23izfyduFFS4jRjdIAJ6Wuh+Rnz7wduP93SNNag1114F2bH+XdtD/3dD0DCdl1IKKLP7Um8ToX6KrRb2KiDcD9Y2Ie5RcIulZDP1Pf3RJdMurnSawiymlXVePe3Vrq4TpxNagMRxWTJzyb2+chKvsIlXYJNJ1SLkInB1G1oRFHwNpAcdI4hxiROyMTSgTtdQGgCj1YhbGlELP0Z3S9NmJ4CzVVpa3OQ87XeT1jHbiewf7HS5Q9hcrnNOsum3N4lIR4wrtlbXQEz0GEHLkv/w==",
+	"SigningCertUrl": "https://sns.ap-northeast-2.amazonaws.com/SimpleNotificationService-7ff5318490ec183fbaddaa2a969abfda.pem",
+	"UnsubscribeUrl": "https://sns.ap-northeast-2.amazonaws.com/?Action=Unsubscribe&SubscriptionArn=arn:aws:sns:ap-northeast-2:482185933710:KG-WEB-DELETE:a5b12246-4757-4311-89b4-02f2ff43621a",
+	"MessageAttributes": {}
+	}
+}
+]
+}
