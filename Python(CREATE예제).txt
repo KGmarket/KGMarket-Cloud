@@ -3,7 +3,6 @@ import json, boto3
 def lambda_handler(event, context):
     print("Event received by Lambda function: " + json.dumps(event, indent=2))
     
-    add = []
     
     ec2 = boto3.resource('ec2')
     name = event['Records'][0]['Sns']['Message'].split("EC2InstanceId")[1].split('"')[2]
@@ -15,7 +14,7 @@ def lambda_handler(event, context):
     
     
     ssm_client = boto3.client('ssm')
-    commands = 'echo "    - targets: [\'' + str(ip) + ':9090\']" | sudo tee -a /home/prometheus/prometheus/prometheus.yml'
+    commands = 'echo "    - targets: [\'' + str(ip) + ':9100\'] # ' + name + '" | sudo tee -a /home/prometheus/prometheus/prometheus.yml'
     
     ssm_client.send_command(
         InstanceIds=['i-0efe021a979bd2bcd'],
